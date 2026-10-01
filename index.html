@@ -192,6 +192,13 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 .buton:disabled{opacity:.42;cursor:default;transform:none;box-shadow:0 .25rem 0 var(--alama-2)}
 .actiuni{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;min-width:0;max-width:100%}
 .pod .buton{max-width:100%;overflow-wrap:break-word}
+.pod .indiciu-btn:disabled{display:none}
+@media (min-width:760px) and (min-aspect-ratio:5/4){
+  .pod{align-items:stretch}
+  .pod .citire-btn{margin-left:auto;width:3.1rem;min-width:3rem;padding:.55rem;flex:none}
+  #filmCmd{width:100%}
+  .pod .indiciu-btn:disabled{display:inline-flex;box-shadow:0 .25rem 0 var(--umbra)}
+}
 .grila-scroll{max-width:100%;overflow:auto;padding:.2rem}
 .sir-ales{flex-wrap:wrap}
 .cap,.verdict,.opt,.nivel{overflow-wrap:break-word}
@@ -368,7 +375,7 @@ input.text:focus{outline:none;border-color:var(--alama-2)}
   .nivele{grid-template-columns:1fr 1fr}
 }
 
-@media (max-width:900px){
+@media (max-width:900px), (min-width:760px) and (max-height:650px){
   .chart{flex:none;min-height:0}
   .chart-traseu{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;padding:1rem .5rem}
   .chart svg.ruta,.chart .corabie{display:none}
@@ -381,6 +388,38 @@ input.text:focus{outline:none;border-color:var(--alama-2)}
   .voal{padding:.5rem}
   #app[data-vedere^="final:"] .pod{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
   #app[data-vedere^="final:"] .pod .buton{padding:.55rem .65rem}
+}
+
+/* Când zoom-ul sau bara browserului reduc înălțimea, păstrăm țintele de
+   48 px și așezăm indicațiile alături de grilă. Bara de comenzi rămâne pe un rând. */
+@media (min-width:760px) and (max-height:650px){
+  #app{padding:.35rem .6rem}
+  #app > * + *{margin-top:.35rem}
+  .rail{flex-wrap:nowrap;padding:.25rem .4rem}
+  .rail-identitate{flex:1;min-width:0}
+  .rail-actiuni{display:flex;flex-wrap:nowrap;width:auto}
+  .rail-actiuni .cuv{display:none}
+  .rail-actiuni .mic-btn{min-width:3rem;padding:.3rem}
+  .cap{padding:.4rem .75rem 0}
+  .corp{padding:.4rem .75rem}
+  .corp > * + *{margin-top:.4rem}
+  .pod{padding:.4rem .75rem;gap:.5rem}
+  .intrebare{font-size:1.12rem;line-height:1.25}
+  .chip{width:2.6rem;height:2.6rem;font-size:1.5rem}
+  .optiuni,.nivele{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tabla{padding:.4rem .6rem}
+  .tabla div{font-size:1.08rem;line-height:1.2}
+  .zona-harta{gap:.5rem}
+  .chart-traseu{grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;padding:.65rem}
+  .proba-harta{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto 1fr;gap:.5rem;align-content:start}
+  .proba-harta > * + *{margin-top:0}
+  .proba-harta .vorbitor{grid-column:1;grid-row:1}
+  .proba-harta .zona-harta{display:contents}
+  .proba-harta .tabla{grid-column:1;grid-row:2;align-self:start}
+  .proba-harta .grila-scroll{grid-column:2;grid-row:1 / span 3;align-self:start}
+  .proba-harta .roza{grid-column:1;grid-row:3;width:auto;align-self:start;font-size:.8rem}
+  .proba-harta .roza svg{display:none}
+  .proba-harta .feedback{grid-column:1 / -1}
 }
 
 /* ——— mouse: efectele de hover rămân doar unde există mouse; pe tablă, un deget
@@ -1756,8 +1795,8 @@ function blocFeedback(){
 function blocActiuni(extra){
   var p=A.pas,h=A.rezolvat?'':(extra||'');
   if(A.rezolvat) h+='<button class="buton" onclick="inainte()">Mai departe ⚓</button>';
-  else if(p.hint&&!A.aratHint) h+='<button class="buton linistit" onclick="cereIndiciu()">💡 Indiciu (−1 🪙)</button>';
-  h+='<button class="buton linistit" onclick="citesteAcum()" title="Citește textul cu voce tare" aria-label="Citește textul cu voce tare">🔊</button>';
+  else if(p.hint) h+='<button class="buton linistit indiciu-btn" onclick="cereIndiciu()"'+(A.aratHint?' disabled aria-label="Indiciu afișat"':'')+'>💡 Indiciu (−1 🪙)</button>';
+  h+='<button class="buton linistit citire-btn" onclick="citesteAcum()" title="Citește textul cu voce tare" aria-label="Citește textul cu voce tare">🔊</button>';
   return h;
 }
 function ecranJoc(){
@@ -1776,7 +1815,7 @@ function ecranJoc(){
   else if(p.t==='ordine') z=partOrdine(p);
   else if(p.t==='premiu') z=partPremiu();
   else z=partStory(p);
-  return foaie(cap+'<hr class="val">',z.c,z.p);
+  return foaie(cap+'<hr class="val">',z.c,z.p,'proba proba-'+p.t);
 }
 function partStory(p){
   return {c:vorbitor(p.cine,(p.text||[]).map(function(t){ return '<p>'+E(t)+'</p>'; }).join('')),
@@ -1831,7 +1870,7 @@ function partDecizie(p){
     c+='</div>';
   }
   return {c:c,p:(A.rezolvat?'<button class="buton" onclick="inainte()">Mai departe ⚓</button>':'')+
-    '<button class="buton linistit" onclick="citesteAcum()" title="Citește cu voce tare" aria-label="Citește cu voce tare">🔊</button>'};
+    '<button class="buton linistit citire-btn" onclick="citesteAcum()" title="Citește cu voce tare" aria-label="Citește cu voce tare">🔊</button>'};
 }
 function raspDecizie(i){
   if(A.rezolvat) return;
@@ -2894,7 +2933,7 @@ function terminaFilm(totul){
   var c=document.getElementById('filmCmd');
   if(c) c.innerHTML='<button class="buton" onclick="inainte()">Mai departe ⚓</button>'+
     '<button class="buton linistit" onclick="revezi()">🔁 Revezi</button>'+
-    '<button class="buton linistit" onclick="citesteFilm()" title="Citește textul" aria-label="Citește textul">🔊</button>';
+    '<button class="buton linistit citire-btn" onclick="citesteFilm()" title="Citește textul" aria-label="Citește textul">🔊</button>';
 }
 function citesteFilm(){ spune(A.pas.replici.map(function(r){ return r.x; })); }
 function sariFilm(){

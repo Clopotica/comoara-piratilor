@@ -46,7 +46,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
    await page.locator('#app .pod button').filter({hasText:/Mai departe|Continuă/}).first().tap();
   }
   assert.equal(await page.evaluate(()=>S.gata.length),6);console.log('Completed world using touch:',rounds,'steps;',Array.from(types).join(', '));
-  await page.setViewportSize({width:390,height:650});
+  await page.setViewportSize(process.env.TOUCH_VIEWPORT?JSON.parse(process.env.TOUCH_VIEWPORT):{width:390,height:650});
   await page.evaluate(()=>{
    potriveste();S.niv='cap';S.lume=0;INSULE=lumea(0);
    outer:for(let i=0;i<INSULE.length;i++)for(let p=0;p<coada(i).length;p++){const step=R(coada(i)[p]);if(step.t==='cod'&&step.hint){S.ins=i;S.p=p;break outer}}
