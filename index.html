@@ -37,7 +37,7 @@
 *{box-sizing:border-box}
 html{
   font-size:16px;
-  font-size:max(14px,min(1.6vw,2.2857vh));
+  font-size:max(16px,min(1.6vw,2.2857vh));
   -webkit-text-size-adjust:100%;text-size-adjust:100%;
   /* pe tablă ating mai mulți copii deodată: fără zoom din ciupit sau dublu-atins */
   touch-action:pan-x pan-y;
@@ -69,8 +69,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:.19rem solid var(--alama);
 
 /* ——— balustrada corăbiei ——— */
 .rail{
-  flex:none;display:flex;align-items:center;gap:.45rem;
-  padding:.3rem .45rem;border-radius:999px;
+  flex:none;display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;
+  padding:.35rem .5rem;border-radius:1rem;
   background:linear-gradient(180deg,#3a2a17,#241708);
   border:1px solid #543c1c;
   box-shadow:0 .125rem 0 #0004,inset 0 1px 0 #ffffff1a;
@@ -82,20 +82,29 @@ button:focus-visible,[tabindex]:focus-visible{outline:.19rem solid var(--alama);
   box-shadow:inset 0 0 0 .125rem #2e1e0a;
 }
 .nume{font-family:var(--display);font-weight:700;font-size:1rem;color:#f4dfae;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:30vw}
-.rail .spatiu{flex:1}
+.rail-identitate{display:flex;align-items:center;gap:.45rem;flex:1 1 9rem;min-width:0}
+.rail-identitate .nume{flex:1;min-width:0;max-width:none}
+.rail-actiuni{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.rail .contor{flex:none}
 .contor{
   display:flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:999px;
   background:#00000038;border:1px solid #6b4e22;color:#f2d79a;
   font-family:var(--log);font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 .mic-btn{
-  flex:none;min-width:2.5rem;min-height:2.5rem;padding:.3rem .8rem;border-radius:999px;
+  flex:none;min-width:3rem;min-height:3rem;padding:.3rem .8rem;border-radius:999px;
   background:#00000038;border:1px solid #6b4e22;color:#f2d79a;font-weight:700;font-size:.92rem;
   white-space:nowrap;transition:background .15s;
 }
 .mic-btn:active{background:#00000070}
 .mic-btn.pornit{background:#dfa23533;border-color:var(--alama)}
-@media (max-width:640px){ .mic-btn .cuv{display:none} .rail .ecran-complet{display:none} }
+@media (max-width:760px){
+  .rail-identitate{flex-basis:100%}
+  .rail-actiuni{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:100%;gap:.3rem}
+  .rail-actiuni .mic-btn{padding:.3rem;min-width:0}
+  .rail-actiuni .cuv{display:none}
+}
+@media (max-width:365px){.rail-actiuni{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* ——— foaia de pergament: trei zone ——— */
 .foaie{
@@ -118,10 +127,11 @@ button:focus-visible,[tabindex]:focus-visible{outline:.19rem solid var(--alama);
   position:relative;z-index:1;
   scrollbar-width:auto;scrollbar-color:#c2a87b transparent;
 }
+.corp > *{flex-shrink:0;min-width:0}
 .corp > * + *{margin-top:.65rem}
 .corp::-webkit-scrollbar{width:.7rem}
 .corp::-webkit-scrollbar-thumb{background:#c2a87b;border-radius:99px}
-.corp.plin{padding:0 .6rem .4rem;overflow:hidden}
+.corp.plin{padding:.4rem .6rem .4rem;overflow:auto}
 .pod{
   flex:none;padding:.65rem var(--gx);
   border-top:1px dashed #b79a6c99;
@@ -180,7 +190,11 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 .buton.linistit{background:#fffaf0;color:var(--cerneala);border-color:var(--umbra);box-shadow:0 .25rem 0 var(--umbra)}
 .buton.linistit:active{box-shadow:0 .06rem 0 var(--umbra)}
 .buton:disabled{opacity:.42;cursor:default;transform:none;box-shadow:0 .25rem 0 var(--alama-2)}
-.actiuni{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.actiuni{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;min-width:0;max-width:100%}
+.pod .buton{max-width:100%;overflow-wrap:break-word}
+.grila-scroll{max-width:100%;overflow:auto;padding:.2rem}
+.sir-ales{flex-wrap:wrap}
+.cap,.verdict,.opt,.nivel{overflow-wrap:break-word}
 
 /* ——— verdict ——— */
 .verdict{
@@ -200,7 +214,7 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 .grila{display:grid;grid-gap:.25rem;gap:.25rem;background:#dcc79b;padding:.45rem;border-radius:.7rem;border:1px solid var(--umbra)}
 .grila .cap2{display:grid;place-items:center;font-family:var(--log);font-size:.85rem;color:var(--cerneala-2);min-width:1.2rem}
 .celula{
-  width:2.95rem;height:2.95rem;display:grid;place-items:center;
+  width:3rem;height:3rem;display:grid;place-items:center;
   font-size:1.55rem;
   background:#f7edd6;border:1px solid #cbb489;border-radius:.45rem;transition:transform .1s,background .12s;
 }
@@ -261,7 +275,7 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 
 /* ——— peliculă ——— */
 .film{
-  flex:1;min-height:0;position:relative;border-radius:.7rem;overflow:hidden;
+  flex:1;min-height:12rem;position:relative;border-radius:.7rem;overflow:hidden;
   background:#04121d;border:1px solid #2f6a86;box-shadow:0 .9rem 1.9rem -1.1rem #000c;
 }
 .film canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block}
@@ -279,11 +293,12 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 
 /* ——— harta insulelor ——— */
 .chart{
-  flex:1;min-height:0;position:relative;border-radius:.7rem;overflow:hidden;
+  flex:1;min-height:18rem;position:relative;border-radius:.7rem;overflow:hidden;
   background:radial-gradient(120% 100% at 30% 10%,#1a5a76,#0c2c3f 70%);border:1px solid #2f6a86;
 }
+.chart-traseu{position:absolute;top:2.5rem;right:5rem;bottom:3.5rem;left:5rem}
 .chart svg.ruta{position:absolute;top:0;left:0;width:100%;height:100%}
-.insula{position:absolute;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);display:grid;justify-items:center;grid-gap:.15rem;gap:.15rem;width:7rem}
+.insula{position:absolute;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);display:grid;justify-items:center;grid-gap:.15rem;gap:.2rem;width:9rem;padding:0}
 .pin{
   width:3.6rem;height:3.6rem;display:grid;place-items:center;
   font-size:1.8rem;border-radius:50%;
@@ -291,7 +306,7 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
   box-shadow:0 .4rem .9rem #0007;transition:transform .15s;position:relative;
 }
 .insula:active .pin{transform:scale(1.08)}
-.insula .et{font-family:var(--log);font-size:.76rem;color:#d9ecf2;background:#08202fcc;padding:.05rem .4rem;border-radius:999px;white-space:nowrap;border:1px solid #2f6a86}
+.insula .et{font-family:var(--log);font-size:.76rem;color:#d9ecf2;background:#08202fcc;padding:.05rem .4rem;border-radius:.55rem;white-space:normal;max-width:100%;line-height:1.25;text-align:center;border:1px solid #2f6a86}
 .insula.blocata{cursor:default}
 .insula.blocata .pin{filter:grayscale(.75) brightness(.6);border-color:#4d5f68;box-shadow:none}
 .insula.blocata .et{opacity:.55}
@@ -316,8 +331,9 @@ hr.val{border:0;height:.45rem;margin:.5rem 0 0;opacity:.45;
 /* ——— fereastră ——— */
 #voal:empty{display:none}
 .voal{position:fixed;top:0;right:0;bottom:0;left:0;z-index:20;background:#04141fe0;display:grid;place-items:center;padding:.75rem}
+.voal .cap{padding-right:4.2rem}
 .voal .foaie{max-width:42rem;width:100%;flex:none;height:94vh;height:calc(var(--h,100vh) * .94);max-height:48rem}
-.inchide{position:absolute;top:.5rem;right:.6rem;z-index:3;width:2.6rem;height:2.6rem;border-radius:50%;background:#00000012;font-size:1.2rem;line-height:1}
+.inchide{position:absolute;top:.5rem;right:.6rem;z-index:3;width:3rem;height:3rem;border-radius:50%;background:#00000012;font-size:1.2rem;line-height:1}
 .inchide:active{background:#00000026}
 
 /* ——— diverse ——— */
@@ -352,6 +368,21 @@ input.text:focus{outline:none;border-color:var(--alama-2)}
   .nivele{grid-template-columns:1fr 1fr}
 }
 
+@media (max-width:900px){
+  .chart{flex:none;min-height:0}
+  .chart-traseu{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;padding:1rem .5rem}
+  .chart svg.ruta,.chart .corabie{display:none}
+  .chart .insula{position:static;transform:none;width:auto;align-content:start}
+}
+@media (max-width:640px){
+  .memorie{grid-template-columns:repeat(var(--coloane-mici,3),minmax(0,1fr))!important}
+  .taste{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .zona-cod>*{flex-basis:100%}
+  .voal{padding:.5rem}
+  #app[data-vedere^="final:"] .pod{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+  #app[data-vedere^="final:"] .pod .buton{padding:.55rem .65rem}
+}
+
 /* ——— mouse: efectele de hover rămân doar unde există mouse; pe tablă, un deget
    ar lăsa butonul „agățat" în starea de hover ——— */
 @media (hover:hover) and (pointer:fine){
@@ -371,20 +402,19 @@ input.text:focus{outline:none;border-color:var(--alama-2)}
 
 /* Login simplu pentru GitHub Pages: bariera vizuala, nu autentificare pe server. */
 html.login-blocat #app,html.login-blocat #mare,html.login-blocat #voal{display:none!important}
-#login-wall{position:fixed;z-index:100;top:0;left:0;width:100%;height:100%;overflow:auto;padding:32px 20px;background:radial-gradient(ellipse at 50% 15%,#1b5570,#08202f 75%);display:flex;align-items:center;justify-content:center;font-size:16px}
+#login-wall{position:fixed;z-index:100;top:0;left:0;width:100%;height:100%;overflow:auto;padding:1.25rem;background:radial-gradient(ellipse at 50% 15%,#1b5570,#08202f 75%);display:flex;align-items:center;justify-content:center;font-size:1rem}
 #login-wall[hidden]{display:none}
-.login-card{width:100%;max-width:420px;margin:auto;background:#f0e2c0;color:#33200f;border:1px solid #c2a87b;border-radius:18px;padding:32px;box-shadow:0 20px 65px #0006}
-.login-emblem{text-align:center;font-size:42px;margin-bottom:12px}
-.login-card h1{font-size:30px;text-align:center;line-height:1.2}
-.login-card .login-subtitle{text-align:center;margin:12px 0 24px;color:#71512f}
-.login-card label{display:block;font-weight:800;margin:16px 0 6px}
-.login-card input{display:block;width:100%;min-height:48px;padding:12px;border:1px solid #b99c68;border-radius:8px;background:#fffaf0;color:#33200f;font:inherit;user-select:text;-webkit-user-select:text}
+.login-card{width:100%;max-width:27rem;flex-shrink:0;margin:auto;background:#f0e2c0;color:#33200f;border:1px solid #c2a87b;border-radius:1rem;padding:1.75rem;box-shadow:0 20px 65px #0006}
+.login-emblem{text-align:center;font-size:2.6rem;margin-bottom:.75rem}
+.login-card h1{font-size:1.85rem;text-align:center;line-height:1.2}
+.login-card .login-subtitle{text-align:center;margin:.75rem 0 1.5rem;color:#71512f}
+.login-card label{display:block;font-weight:800;margin:1rem 0 .4rem}
+.login-card input{display:block;width:100%;min-height:3rem;padding:.75rem;border:1px solid #b99c68;border-radius:8px;background:#fffaf0;color:#33200f;font:inherit;user-select:text;-webkit-user-select:text}
 .login-card input:focus{outline:3px solid #1b5570;outline-offset:2px}
-.login-card button[type=submit]{width:100%;min-height:48px;margin-top:18px;border-radius:8px;background:#10394f;color:#fff;font-weight:800;padding:12px}
+.login-card button[type=submit]{width:100%;min-height:3rem;margin-top:1.1rem;border-radius:8px;background:#10394f;color:#fff;font-weight:800;padding:.75rem}
 .login-card button:disabled{opacity:.65;cursor:wait}
-#login-error{min-height:24px;margin-top:12px;color:#9a241c;font-weight:700}
-#logout-intro{position:fixed;top:12px;right:12px;z-index:20;background:#10394f}
-@media(max-width:480px){.login-card{padding:24px}.login-card h1{font-size:26px}.rail .logout-btn{padding:.3rem .5rem;min-width:2rem}}
+#login-error{min-height:1.5rem;margin-top:.75rem;color:#9a241c;font-weight:700}
+@media(max-width:480px){.login-card{padding:1.25rem}.login-card h1{font-size:1.65rem}}
 
 </style>
 
@@ -1484,15 +1514,14 @@ function vorbitor(c,corp){
 function bara(){
   if(S.ecran==='intro') return '';
   return '<div class="rail">'+
-    '<div class="medalion">'+S.av+'</div><div class="nume">'+E(S.nume||'Matelot')+'</div>'+
-    '<div class="spatiu"></div>'+
-    '<div class="contor">🪙 '+S.dub+'</div>'+
-    (S.ecran==='setup'?'':'<button class="mic-btn" onclick="mergiLa(\'lumi\')" title="Alege altă lume">🌍<span class="cuv"> Lumi</span></button>')+
-    '<button class="mic-btn" onclick="jurnal()" title="Jurnalul de bord">📖<span class="cuv"> Jurnal</span></button>'+
-    '<button class="mic-btn'+(S.voce?' pornit':'')+'" onclick="fereastraVoce()" title="Naratoarea">🎙️<span class="cuv"> Voce</span></button>'+
+    '<div class="rail-identitate"><div class="medalion">'+S.av+'</div><div class="nume">'+E(S.nume||'Matelot')+'</div>'+
+    '<div class="contor">🪙 '+S.dub+'</div></div><div class="rail-actiuni">'+
+    (S.ecran==='setup'?'':'<button class="mic-btn" onclick="mergiLa(\'lumi\')" title="Alege altă lume" aria-label="Alege altă lume">🌍<span class="cuv"> Lumi</span></button>')+
+    '<button class="mic-btn" onclick="jurnal()" title="Jurnalul de bord" aria-label="Jurnalul de bord">📖<span class="cuv"> Jurnal</span></button>'+
+    '<button class="mic-btn'+(S.voce?' pornit':'')+'" onclick="fereastraVoce()" title="Naratoarea" aria-label="Naratoarea">🎙️<span class="cuv"> Voce</span></button>'+
     '<button class="mic-btn" onclick="comutaSunet()" title="Sunetul jocului" aria-label="Sunet">'+(S.sunet?'🔊':'🔇')+'</button>'+
     butonEcranComplet('mic-btn')+
-  '</div>';
+  '</div></div>';
 }
 function comutaSunet(){ S.sunet=!S.sunet; if(!S.sunet&&typeof opresteAmb==='function') opresteAmb(); salveaza(); render(); }
 /* ecran complet: pe tablă ascunde bara browserului și a sistemului, deci mai mult loc și nicio filă atinsă din greșeală */
@@ -1500,8 +1529,8 @@ function eCompletPosibil(){ var d=document.documentElement; return !!(d.requestF
 function eComplet(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
 function butonEcranComplet(cls){
   if(!eCompletPosibil()) return '';
-  return '<button class="'+cls+' ecran-complet" onclick="comutaEcranComplet()" title="Ecran complet">'+
-    (eComplet()?'↩️<span class="cuv"> Ieși din ecran complet</span>':'🖥️<span class="cuv"> Ecran complet</span>')+'</button>';
+  return '<button class="'+cls+' ecran-complet" onclick="comutaEcranComplet()" title="Ecran complet" aria-label="'+(eComplet()?'Ieși din ecran complet':'Ecran complet')+'">'+
+    (eComplet()?'↩️<span class="cuv"> Micșorează</span>':'🖥️<span class="cuv"> Ecran complet</span>')+'</button>';
 }
 function comutaEcranComplet(){
   var d=document, el=d.documentElement, r;
@@ -1620,12 +1649,12 @@ function ecranHarta(){
       '<h2 class="titlu" style="font-size:1.45rem">'+(S.gata.length>=INSULE.length?'Toate insulele explorate':'Escala următoare: '+E(INSULE[urm].nume))+'</h2>'+
     '</div><div class="tag">'+S.gata.length+' / '+INSULE.length+' insule</div></div>'+
     '<div class="bara" style="margin-top:.45rem"><i style="width:'+Math.round(S.gata.length/INSULE.length*100)+'%"></i></div>';
-  var corp='<div class="chart">'+
+  var corp='<div class="chart"><div class="chart-traseu">'+
       '<svg class="ruta" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+
         '<polyline points="'+pts+'" fill="none" stroke="#dfa23577" stroke-width="0.6" stroke-dasharray="2 2"/>'+
       '</svg>'+pini+
       '<div class="corabie" style="left:'+pozC.x+'%;top:'+(pozC.y-13)+'%">⛵</div>'+
-    '</div>';
+    '</div></div>';
   var pod=(S.gata.indexOf(INSULE.length-1)<0
       ?'<button class="buton" onclick="intraInsula('+urm+')">'+INSULE[urm].e+' Debarcă pe '+E(INSULE[urm].nume)+'</button>'
       :'<button class="buton" onclick="mergiLa(\'final\')">💎 Vezi diploma</button>')+
@@ -1725,10 +1754,10 @@ function blocFeedback(){
   return h?'<div class="feedback">'+h+'</div>':'';
 }
 function blocActiuni(extra){
-  var p=A.pas,h=extra||'';
+  var p=A.pas,h=A.rezolvat?'':(extra||'');
   if(A.rezolvat) h+='<button class="buton" onclick="inainte()">Mai departe ⚓</button>';
   else if(p.hint&&!A.aratHint) h+='<button class="buton linistit" onclick="cereIndiciu()">💡 Indiciu (−1 🪙)</button>';
-  h+='<button class="buton linistit" onclick="citesteAcum()" title="Citește textul cu voce tare">🔊</button>';
+  h+='<button class="buton linistit" onclick="citesteAcum()" title="Citește textul cu voce tare" aria-label="Citește textul cu voce tare">🔊</button>';
   return h;
 }
 function ecranJoc(){
@@ -1802,7 +1831,7 @@ function partDecizie(p){
     c+='</div>';
   }
   return {c:c,p:(A.rezolvat?'<button class="buton" onclick="inainte()">Mai departe ⚓</button>':'')+
-    '<button class="buton linistit" onclick="citesteAcum()" title="Citește cu voce tare">🔊</button>'};
+    '<button class="buton linistit" onclick="citesteAcum()" title="Citește cu voce tare" aria-label="Citește cu voce tare">🔊</button>'};
 }
 function raspDecizie(i){
   if(A.rezolvat) return;
@@ -1830,7 +1859,7 @@ function partHarta(p){
     }
   }
   cel+='</div>';
-  return {c:vorbitor(p.cine,'<p class="intrebare">'+E(p.q)+'</p>')+'<div class="zona-harta">'+tabla(p)+cel+rozaVant()+'</div>'+blocFeedback(),
+  return {c:vorbitor(p.cine,'<p class="intrebare">'+E(p.q)+'</p>')+'<div class="zona-harta">'+tabla(p)+'<div class="grila-scroll">'+cel+'</div>'+rozaVant()+'</div>'+blocFeedback(),
           p:blocActiuni()};
 }
 function raspHarta(id){
@@ -1847,7 +1876,7 @@ function partCod(p){
   /* tastele pe cel mult două rânduri egale: cifrele 5+5, literele 6 sau 4+4 */
   var col=pool.length<=6?pool.length:Math.ceil(pool.length/2);
   var cifru=p.cifru?'<div class="cifru">'+p.cifru.map(function(c){ return '<div><b>'+c[0]+'</b>'+c[1]+'</div>'; }).join('')+'</div>':'';
-  var extra='<button class="buton linistit" onclick="stergeCod()"'+(A.rezolvat?' disabled':'')+'>⌫</button>'+
+  var extra='<button class="buton linistit" aria-label="Șterge ultimul simbol" onclick="stergeCod()"'+(A.rezolvat?' disabled':'')+'>⌫</button>'+
     '<button class="buton" onclick="verificaCod()"'+(A.rezolvat||A.buf.length<n?' disabled':'')+'>🔓 Verifică</button>'+
     (p.jurnal?'<button class="buton linistit" onclick="jurnal()">📖 Jurnal</button>':'');
   var tastatura='<div class="tastatura"><div class="afisaj">'+slots+'</div>'+
@@ -1868,7 +1897,7 @@ function verificaCod(){
 /* plăcuțele pe un rând (până la 6) sau pe două rânduri egale */
 function grilaPlacute(tiles,n){
   var col=n<=6?n:Math.ceil(n/2);
-  return '<div class="memorie" style="grid-template-columns:repeat('+col+',1fr);max-width:'+(col*6)+'rem">'+tiles+'</div>';
+  return '<div class="memorie" style="--coloane-mici:'+(n<=4?2:3)+';grid-template-columns:repeat('+col+',minmax(0,1fr));max-width:'+(col*6)+'rem">'+tiles+'</div>';
 }
 function partMemorie(p){
   var tiles=p.pool.map(function(s,i){
@@ -2044,6 +2073,11 @@ function resetJoc(niv){
 
 /* ═══════════ RANDARE ═══════════ */
 function render(){
+  var vedere=S.ecran+':'+S.lume+':'+(S.ecran==='joc'?S.ins+':'+S.p:'');
+  var feedback=S.ecran==='joc'?(A.fb||'')+':'+!!A.aratHint+':'+!!A.rezolvat:'';
+  var feedbackNou=app().getAttribute('data-feedback')!==feedback;
+  var corpVechi=app().querySelector('.corp');
+  var derulare=app().getAttribute('data-vedere')===vedere&&corpVechi?corpVechi.scrollTop:0;
   var c='';
   if(S.ecran==='intro') c=ecranIntro();
   else if(S.ecran==='setup') c=ecranSetup();
@@ -2052,6 +2086,8 @@ function render(){
   else if(S.ecran==='joc') c=ecranJoc();
   else if(S.ecran==='final') c=ecranFinal();
   app().innerHTML=bara()+c;
+  app().setAttribute('data-vedere',vedere);
+  app().setAttribute('data-feedback',feedback);
   var logout=document.createElement('button');
   logout.type='button';
   logout.className='mic-btn logout-btn';
@@ -2059,14 +2095,16 @@ function render(){
   logout.setAttribute('aria-label','Ieșire din cont');
   logout.innerHTML='↪<span class="cuv"> Ieșire</span>';
   logout.onclick=window.comoaraLogout;
-  var rail=app().querySelector('.rail');
+  var rail=app().querySelector('.rail-actiuni');
   if(rail)rail.appendChild(logout);
-  else{logout.id='logout-intro';app().appendChild(logout);}
+  else{logout.className='buton linistit logout-btn';app().querySelector('.pod').appendChild(logout);}
+  var corpNou=app().querySelector('.corp');
+  if(corpNou)corpNou.scrollTop=derulare;
 
   if(S.ecran==='joc'&&A.pas&&A.pas.t==='film'){
     if(A.filmGata) terminaFilm(true); else pornesteFilm();
   }
-  if(S.ecran==='joc'&&(A.fb||A.aratHint)) aduInVedereVerdictul();
+  if(feedbackNou&&S.ecran==='joc'&&(A.fb||A.aratHint)) aduInVedereVerdictul();
 }
 /* după un răspuns, verdictul poate cădea sub marginea foii; îl aducem în vedere */
 function aduInVedereVerdictul(){
@@ -2856,7 +2894,7 @@ function terminaFilm(totul){
   var c=document.getElementById('filmCmd');
   if(c) c.innerHTML='<button class="buton" onclick="inainte()">Mai departe ⚓</button>'+
     '<button class="buton linistit" onclick="revezi()">🔁 Revezi</button>'+
-    '<button class="buton linistit" onclick="citesteFilm()" title="Citește textul">🔊</button>';
+    '<button class="buton linistit" onclick="citesteFilm()" title="Citește textul" aria-label="Citește textul">🔊</button>';
 }
 function citesteFilm(){ spune(A.pas.replici.map(function(r){ return r.x; })); }
 function sariFilm(){
@@ -2893,7 +2931,7 @@ function potriveste(){
   d.style.setProperty('--h',h+'px');
   var a=document.activeElement;
   if(a&&a.tagName==='INPUT') return; /* tastatura de pe ecran nu micșorează tot jocul */
-  d.style.fontSize=Math.max(14,Math.min(w/1000,h/700)*16).toFixed(2)+'px';
+  d.style.fontSize=Math.max(16,Math.min(w/1000,h/700)*16).toFixed(2)+'px';
 }
 potriveste();
 addEventListener('focusout',function(e){ if(e.target&&e.target.tagName==='INPUT') setTimeout(potriveste,0); });
@@ -2904,7 +2942,15 @@ addEventListener('touchstart',function(){ ULTIM_PTR='touch'; },{capture:true,pas
 addEventListener('contextmenu',function(e){
   if(ULTIM_PTR!=='mouse'&&!(e.target&&e.target.tagName==='INPUT')) e.preventDefault();
 });
-function laSchimbareEcran(){ if(S.ecran!=='joc'||!A.pas||A.pas.t!=='film') render(); }
+function laSchimbareEcran(){
+  potriveste();
+  var butoane=document.querySelectorAll('.ecran-complet');
+  for(var i=0;i<butoane.length;i++){
+    var b=butoane[i], text=eComplet()?'Ieși din ecran complet':'Ecran complet';
+    b.setAttribute('aria-label',text); b.title=text;
+    b.innerHTML=(eComplet()?'↩️':'🖥️')+'<span class="cuv"> '+(eComplet()?'Micșorează':'Ecran complet')+'</span>';
+  }
+}
 document.addEventListener('fullscreenchange',laSchimbareEcran);
 document.addEventListener('webkitfullscreenchange',laSchimbareEcran);
 deseneazaMarea();
