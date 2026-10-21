@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · Forever Afterschool</title>
+<style>
+  :root {
+    --bg: #f5f3ee; --card: #ffffff; --text: #1f2430; --muted: #6a7184; --line: #e2dfd6;
+    --accent: #2f6fdd; --accent-text: #ffffff; --danger: #c43c3c; --ok: #1d7f47;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15171c; --card: #1f222a; --text: #e9ebf0; --muted: #9aa1b2; --line: #30343e;
+      --accent: #5b8ff0; --accent-text: #0e1320; --danger: #ef6b6b; --ok: #4cc27f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 24px 0 8px; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header h1 small { display: block; color: var(--muted); font-size: .95rem; font-weight: 500; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: .95rem; }
+  nav a { color: var(--accent); }
+  nav a[aria-current] { color: var(--text); font-weight: 700; text-decoration: none; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin: 16px 0; }
+  h2 { margin: 0 0 12px; font-size: 1.15rem; }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; }
+  input { width: 100%; font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { font: inherit; font-weight: 600; cursor: pointer; border-radius: 10px; padding: 9px 14px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text); }
+  button.secondary, .link-button { background: transparent; color: var(--accent); }
+  .link-button { font-weight: 600; text-decoration: none; border: 1px solid var(--accent); border-radius: 10px; padding: 9px 14px; }
+  button.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  button:disabled { opacity: .45; cursor: default; }
+  .error { color: var(--danger); min-height: 1.5em; margin: 10px 0; }
+  .hint { color: var(--muted); font-size: .9rem; margin: 8px 0 0; }
+  .add-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
+  .add-row label { margin-top: 0; }
+  .pass { display: flex; gap: 6px; }
+  .list-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .list-head h2 { margin: 0; }
+  .list-head input { width: 220px; }
+  ul.users { list-style: none; margin: 0; padding: 0; }
+  ul.users li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); }
+  ul.users li:first-child { border-top: 0; }
+  ul.users small { display: block; color: var(--muted); }
+  ul.users .actions { display: flex; gap: 6px; }
+  ul.users .actions button { padding: 6px 12px; font-size: .9rem; }
+  .empty { color: var(--muted); padding: 10px 0; }
+  .status { position: sticky; top: 8px; z-index: 1; border-radius: 10px; padding: 10px 14px; margin: 16px 0; border: 1px solid var(--line); background: var(--card); }
+  .status.ok { border-color: var(--ok); color: var(--ok); }
+  .status.error { border-color: var(--danger); color: var(--danger); }
+  .status.busy { color: var(--muted); }
+  .note { color: var(--muted); font-size: .9rem; }
+  .footer { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 40px; }
+  @media (max-width: 600px) {
+    .add-row { grid-template-columns: 1fr; }
+    .list-head input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header class="wrap">
+  <h1>Panou admin <small id="gameName"></small></h1>
+  <nav id="sites" aria-label="Panourile celorlalte jocuri"></nav>
+</header>
+
+<main class="wrap">
+  <noscript><p class="error">Activează JavaScript pentru a folosi panoul.</p></noscript>
+
+  <section id="loginView" hidden>
+    <form id="loginForm" class="card">
+      <h2>Intră în panou</h2>
+      <label for="username">Utilizator</label>
+      <input id="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <label for="password">Parolă</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <p id="loginError" class="error" role="alert"></p>
+      <button id="loginButton" type="submit">Intră</button>
+    </form>
+  </section>
+
+  <section id="panelView" hidden>
+    <p id="status" class="status" role="status" aria-live="polite" hidden></p>
+
+    <form id="addForm" class="card" autocomplete="off">
+      <h2>Adaugă un cont</h2>
+      <div class="add-row">
+        <div>
+          <label for="newUser">Utilizator</label>
+          <input id="newUser" maxlength="32" autocapitalize="none" spellcheck="false" placeholder="de ex. user31" required>
+        </div>
+        <div>
+          <label for="newPassword">Parolă</label>
+          <div class="pass">
+            <input id="newPassword" maxlength="128" spellcheck="false" required>
+            <button id="generate" type="button" class="secondary" title="Generează o parolă">Generează</button>
+          </div>
+        </div>
+        <button type="submit">Adaugă</button>
+      </div>
+      <p class="hint">Litere mici fără diacritice, cifre, punct, - sau _. Notează parola: după salvare nu mai poate fi afișată.</p>
+    </form>
+
+    <div class="card">
+      <div class="list-head">
+        <h2>Conturi (<span id="count">0</span>)</h2>
+        <input id="filter" type="search" placeholder="Caută un cont…" aria-label="Caută un cont">
+      </div>
+      <ul id="users" class="users"></ul>
+    </div>
+
+    <p class="note">Modificările se salvează în fișierul <code>accounts.json</code> din repository.
+      GitHub Pages le publică în 1–2 minute, iar fiecare dispozitiv le aplică la următoarea deschidere a jocului.
+      Un cont șters nu mai poate intra; progresul resetat se șterge pe toate dispozitivele.</p>
+    <div class="footer">
+      <a class="link-button" href="../">Deschide jocul</a>
+      <button id="logout" type="button" class="secondary">Ieși</button>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ===== Configurare pentru acest joc (restul fișierului e la fel în toate cele cinci repo-uri) =====
+const CONFIG = {
+  game: 'Comoara Piratului',
+  repo: 'Clopotica/comoara-piratilor',
+  branch: 'master',
+  file: 'accounts.json',
+  // Cum verifică jocul parolele (index.html); conturile noi primesc același format.
+  scheme: 'sha256-user',
+};
+
+const SITES = [
+  { game: 'Comoara Piratului', url: 'https://clopotica.github.io/comoara-piratilor/admin/' },
+  { game: 'Evadarea Magică', url: 'https://clopotica.github.io/escape-room/admin/' },
+  { game: 'Inventatorii', url: 'https://clopotica.github.io/inventatorii/admin/' },
+  { game: 'Micul Antreprenor', url: 'https://clopotica.github.io/micul-antreprenor/admin/' },
+  { game: 'Neura Island', url: 'https://clopotica.github.io/neuraisland/admin/' },
+];
+const ADMIN_USER = 'admin';
+const API = 'https://api.github.com';
+// Cheia GitHub a panoului, criptată cu parola de admin (AES-GCM, cheie derivată cu PBKDF2).
+const KEY_FILE = 'key.json';
+// Toate cele cinci jocuri sunt pe clopotica.github.io, deci împart sesiunea din aceeași filă.
+const SESSION_KEY = 'clopotica-admin-session';
+const SESSION_MS = 8 * 60 * 60 * 1000;
+const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{1,31}$/;
+const PUBLISH_NOTE = 'Ajunge pe toate dispozitivele în 1–2 minute, la următoarea deschidere a jocului.';
+
+const $ = (id) => document.getElementById(id);
+const has = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+let token = '';
+let accounts = null; // conținutul accounts.json
+let busy = false;
+
+/* ---------- parolele conturilor noi: exact ca în fiecare joc ---------- */
+const encoder = new TextEncoder();
+const toHex = (buffer) => Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, '0')).join('');
+const fromHex = (hex) => Uint8Array.from(hex.match(/.{2}/g), (b) => parseInt(b, 16));
+const randomHex = (bytes) => toHex(crypto.getRandomValues(new Uint8Array(bytes)));
+async function pbkdf2(password, salt, iterations) {
+  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+  return toHex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, key, 256));
+}
+async function sha256(text) {
+  return toHex(await crypto.subtle.digest('SHA-256', encoder.encode(text)));
+}
+const SCHEMES = {
+  // escape-room: PBKDF2-SHA-256, 210.000 iterații, sarea folosită ca text.
+  'pbkdf2-text-salt': {
+    async create(user, password) {
+      const salt = randomHex(16);
+      return { salt, hash: await pbkdf2(password, encoder.encode(salt), 210000) };
+    },
+  },
+  // inventatorii, micul-antreprenor: PBKDF2-SHA-256, sarea ca octeți, iterațiile din accounts.json.
+  'pbkdf2-hex-salt': {
+    async create(user, password, data) {
+      const salt = randomHex(16);
+      return { salt, hash: await pbkdf2(password, fromHex(salt), data.iterations) };
+    },
+  },
+  // neuraisland, comoara-piratilor: SHA-256 din „utilizator:parolă”.
+  'sha256-user': {
+    async create(user, password) {
+      return { hash: await sha256(user + ':' + password) };
+    },
+  },
+};
+const scheme = SCHEMES[CONFIG.scheme];
+
+function generatePassword() {
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789'; // fără 0/o, 1/l/i, ușor de citit de copii
+  return Array.from(crypto.getRandomValues(new Uint32Array(8)), (n) => chars[n % chars.length]).join('');
+}
+
+/* ---------- GitHub: citește și salvează accounts.json ---------- */
+async function github(method, body) {
+  let response;
+  try {
+    response = await fetch(`${API}/repos/${CONFIG.repo}/contents/${CONFIG.file}?ref=${CONFIG.branch}`, {
+      method,
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: 'Bearer ' + token,
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    throw Object.assign(new Error('Nu mă pot conecta la GitHub. Verifică internetul și încearcă din nou.'), { network: true });
+  }
+  if (!response.ok) throw Object.assign(new Error('GitHub ' + response.status), { status: response.status });
+  return response.json();
+}
+function decodeBase64(text) {
+  const binary = atob(text.replace(/\s/g, ''));
+  return new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
+}
+function encodeBase64(text) {
+  let binary = '';
+  encoder.encode(text).forEach((b) => { binary += String.fromCharCode(b); });
+  return btoa(binary);
+}
+async function readAccounts() {
+  const file = await github('GET');
+  return { data: JSON.parse(decodeBase64(file.content)), sha: file.sha };
+}
+// Citește versiunea curentă, aplică schimbarea și o salvează. Dacă între timp lista a fost
+// salvată din alt loc (conflict 409), reia o dată pe versiunea nouă.
+async function save(message, change) {
+  for (let attempt = 1; ; attempt++) {
+    const current = await readAccounts();
+    await change(current.data);
+    try {
+      await github('PUT', {
+        message,
+        content: encodeBase64(JSON.stringify(current.data, null, 2) + '\n'),
+        sha: current.sha,
+        branch: CONFIG.branch,
+      });
+      accounts = current.data;
+      return;
+    } catch (e) {
+      if (e.status !== 409 || attempt >= 2) throw e;
+    }
+  }
+}
+function describe(error) {
+  if (error.status === 401) {
+    return 'Cheia de acces GitHub a panoului nu mai este validă (a expirat sau a fost revocată) și trebuie înlocuită în admin/key.json.';
+  }
+  if (error.status === 403 || error.status === 404) {
+    return `Cheia de acces GitHub a panoului nu are drept de scriere la ${CONFIG.repo}.`;
+  }
+  if (error.status === 409) return 'Lista a fost modificată în același timp din alt loc. Încearcă din nou.';
+  if (error.status) return `GitHub a răspuns cu eroarea ${error.status}. Încearcă din nou peste puțin timp.`;
+  return error.message;
+}
+
+/* ---------- cheie și sesiune ---------- */
+// Decriptează cheia GitHub a panoului cu parola de admin. Întoarce '' dacă parola e greșită.
+async function unlockToken(password) {
+  let response, box;
+  try {
+    response = await fetch(KEY_FILE + '?t=' + Date.now(), { cache: 'no-store' });
+    if (response.ok) box = await response.json();
+  } catch (e) { /* tratat mai jos */ }
+  if (response && response.status === 404) throw new Error('Panoul nu este configurat încă: lipsește cheia de acces (admin/key.json).');
+  if (!box) throw new Error('Nu am putut încărca panoul. Verifică internetul și încearcă din nou.');
+  const material = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', hash: 'SHA-256', salt: fromHex(box.salt), iterations: box.iterations },
+    material, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  try {
+    const data = Uint8Array.from(atob(box.data), (c) => c.charCodeAt(0));
+    return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromHex(box.iv) }, key, data));
+  } catch (e) {
+    return ''; // AES-GCM refuză decriptarea cu altă parolă
+  }
+}
+function startSession() {
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ token, expires: Date.now() + SESSION_MS })); } catch (e) { /* doar până la reîncărcare */ }
+}
+function endSession() {
+  token = '';
+  try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* stocare blocată */ }
+}
+function readSession() {
+  try {
+    const session = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    if (session && session.token && session.expires > Date.now() && session.expires <= Date.now() + SESSION_MS) return session.token;
+  } catch (e) { /* sesiune invalidă */ }
+  return '';
+}
+
+/* ---------- ecrane ---------- */
+function showLogin(message) {
+  $('panelView').hidden = true;
+  $('loginView').hidden = false;
+  $('loginError').textContent = message || '';
+  $('password').value = '';
+  ($('username').value ? $('password') : $('username')).focus();
+}
+function showPanel() {
+  $('loginView').hidden = true;
+  $('panelView').hidden = false;
+  setStatus('');
+  render();
+}
+function expired() {
+  endSession();
+  showLogin(describe({ status: 401 }));
+}
+function setStatus(text, kind) {
+  const status = $('status');
+  status.textContent = text;
+  status.className = 'status ' + (kind || '');
+  status.hidden = !text;
+}
+function setBusy(on) {
+  busy = on;
+  document.querySelectorAll('#panelView button, #panelView input').forEach((el) => {
+    el.disabled = on;
+  });
+}
+function formatDate(iso) {
+  const date = new Date(iso);
+  return isNaN(date) ? '' : date.toLocaleString('ro-RO', { dateStyle: 'short', timeStyle: 'short' });
+}
+function button(text, action, user, className) {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = className;
+  el.textContent = text;
+  el.dataset.action = action;
+  el.dataset.user = user;
+  return el;
+}
+function render() {
+  const query = $('filter').value.trim().toLowerCase();
+  const names = Object.keys(accounts.users);
+  const list = $('users');
+  $('count').textContent = names.length;
+  list.replaceChildren();
+  for (const name of names) {
+    if (query && !name.includes(query)) continue;
+    const item = document.createElement('li');
+    const info = document.createElement('div');
+    const title = document.createElement('strong');
+    const detail = document.createElement('small');
+    title.textContent = name;
+    const reset = accounts.users[name].reset;
+    detail.textContent = reset ? 'Progres resetat: ' + formatDate(reset) : 'Progres neresetat';
+    info.append(title, detail);
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.append(button('Resetează progresul', 'reset', name, 'secondary'), button('Șterge', 'delete', name, 'danger'));
+    item.append(info, actions);
+    list.append(item);
+  }
+  if (!list.children.length) {
+    const empty = document.createElement('li');
+    empty.className = 'empty';
+    empty.textContent = 'Niciun cont găsit.';
+    list.append(empty);
+  }
+}
+
+// Rulează o modificare și afișează rezultatul. Întoarce true dacă s-a salvat.
+async function run(message, change, done) {
+  setBusy(true);
+  setStatus('Se salvează pe GitHub…', 'busy');
+  try {
+    await save(message, change);
+    setStatus(done + ' ' + PUBLISH_NOTE, 'ok');
+    return true;
+  } catch (e) {
+    if (e.status === 401) expired();
+    else setStatus(describe(e), 'error');
+    return false;
+  } finally {
+    setBusy(false);
+    render();
+  }
+}
+
+/* ---------- evenimente ---------- */
+$('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (busy) return;
+  const error = $('loginError');
+  const user = $('username').value.trim().toLowerCase();
+  const password = $('password').value;
+  error.textContent = '';
+  busy = true;
+  $('loginButton').disabled = true;
+  $('loginButton').textContent = 'Se verifică…';
+  try {
+    const unlocked = user === ADMIN_USER ? await unlockToken(password) : '';
+    if (!unlocked) {
+      error.textContent = 'Utilizator sau parolă incorectă.';
+      $('password').value = '';
+      $('password').focus();
+      return;
+    }
+    token = unlocked;
+    accounts = (await readAccounts()).data;
+    startSession();
+    showPanel();
+  } catch (e) {
+    token = '';
+    error.textContent = describe(e);
+  } finally {
+    busy = false;
+    $('loginButton').disabled = false;
+    $('loginButton').textContent = 'Intră';
+  }
+});
+
+$('generate').addEventListener('click', () => {
+  $('newPassword').value = generatePassword();
+});
+
+$('addForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (busy) return;
+  const user = $('newUser').value.trim().toLowerCase();
+  const password = $('newPassword').value;
+  if (!USERNAME_RE.test(user)) {
+    setStatus('Utilizatorul trebuie să aibă 2–32 de caractere: litere mici fără diacritice, cifre, punct, - sau _, și să înceapă cu o literă sau o cifră.', 'error');
+    return;
+  }
+  const exists = `Contul ${user} există deja. Ca să-i schimbi parola, șterge-l și adaugă-l din nou.`;
+  if (has(accounts.users, user)) {
+    setStatus(exists, 'error');
+    return;
+  }
+  if (password.length < 4 || password !== password.trim()) {
+    setStatus('Parola trebuie să aibă cel puțin 4 caractere și să nu înceapă sau să se termine cu spațiu.', 'error');
+    return;
+  }
+  const saved = await run(`Admin: adaugă contul ${user}`, async (data) => {
+    if (has(data.users, user)) throw new Error(exists);
+    // reset: un cont nou pornește de la zero, chiar dacă numele a mai fost folosit pe un dispozitiv.
+    data.users[user] = { ...await scheme.create(user, password, data), reset: new Date().toISOString() };
+  }, `Contul ${user} a fost adăugat cu parola „${password}”. Notează parola: nu mai poate fi afișată.`);
+  if (saved) $('addForm').reset();
+});
+
+$('users').addEventListener('click', (event) => {
+  const target = event.target.closest('button[data-action]');
+  if (!target || busy) return;
+  const user = target.dataset.user;
+  const missing = () => { throw new Error(`Contul ${user} nu mai există.`); };
+  if (target.dataset.action === 'reset') {
+    if (!confirm(`Resetezi progresul contului ${user}?\n\nProgresul se va șterge pe toate dispozitivele, la următoarea deschidere a jocului.`)) return;
+    run(`Admin: resetează progresul contului ${user}`, (data) => {
+      if (!has(data.users, user)) missing();
+      data.users[user].reset = new Date().toISOString();
+    }, `Progresul contului ${user} a fost resetat.`);
+  } else if (target.dataset.action === 'delete') {
+    if (!confirm(`Ștergi contul ${user}?\n\nNu se va mai putea intra în joc cu acest cont, de pe niciun dispozitiv.`)) return;
+    run(`Admin: șterge contul ${user}`, (data) => {
+      if (!has(data.users, user)) missing();
+      delete data.users[user];
+    }, `Contul ${user} a fost șters.`);
+  }
+});
+
+$('filter').addEventListener('input', render);
+
+$('logout').addEventListener('click', () => {
+  endSession();
+  showLogin();
+});
+
+/* ---------- pornire ---------- */
+(async function start() {
+  document.title = 'Admin · ' + CONFIG.game;
+  $('gameName').textContent = CONFIG.game;
+  for (const site of SITES) {
+    const link = document.createElement('a');
+    link.href = site.url;
+    link.textContent = site.game;
+    if (site.game === CONFIG.game) link.setAttribute('aria-current', 'page');
+    $('sites').append(link);
+  }
+  if (!window.crypto || !crypto.subtle) {
+    showLogin('Deschide panoul prin HTTPS (GitHub Pages), într-un browser actualizat.');
+    $('loginButton').disabled = true;
+    return;
+  }
+  token = readSession();
+  if (token) {
+    try {
+      accounts = (await readAccounts()).data;
+      showPanel();
+      return;
+    } catch (e) {
+      if (e.status === 401) { expired(); return; }
+      showLogin(describe(e));
+      return;
+    }
+  }
+  showLogin();
+})();
+</script>
+</body>
+</html>
